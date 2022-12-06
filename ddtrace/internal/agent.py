@@ -6,6 +6,7 @@ from ddtrace.internal.compat import parse
 
 from .http import HTTPConnection
 from .http import HTTPSConnection
+from .ipv6 import is_ipv6_hostname
 from .uds import UDSHTTPConnection
 
 
@@ -24,12 +25,14 @@ T = TypeVar("T")
 
 def get_trace_hostname(default=DEFAULT_HOSTNAME):
     # type: (Union[T, str]) -> Union[T, str]
-    return os.environ.get("DD_AGENT_HOST", os.environ.get("DD_TRACE_AGENT_HOSTNAME", default))
+    hostname = os.environ.get("DD_AGENT_HOST", os.environ.get("DD_TRACE_AGENT_HOSTNAME", default))
+    return [hostname] if is_ipv6_hostname(hostname) else hostname
 
 
 def get_stats_hostname(default=DEFAULT_HOSTNAME):
     # type: (Union[T, str]) -> Union[T, str]
-    return os.environ.get("DD_AGENT_HOST", os.environ.get("DD_DOGSTATSD_HOST", default))
+    hostname = os.environ.get("DD_AGENT_HOST", os.environ.get("DD_DOGSTATSD_HOST", default))
+    return [hostname] if is_ipv6_hostname(hostname) else hostname
 
 
 def get_trace_port(default=DEFAULT_TRACE_PORT):
